@@ -17,6 +17,13 @@ qadam-baqadam qurish qo'llanmasi.
 | [`03_DAX_Measures.md`](03_DAX_Measures.md) | ~30 ta DAX measure (6 guruh) — copy/paste tayyor |
 | [`04_Dashboard_Design.md`](04_Dashboard_Design.md) | 4 sahifa dizayn, rang palitrasi, vizual maketlar |
 | [`05_Build_Guide.md`](05_Build_Guide.md) | Power BI Desktop'da 10 qadamli qurish qo'llanmasi |
+| [`AdventureWorks_Theme.json`](AdventureWorks_Theme.json) | Tayyor Power BI mavzu — ranglar, shrift va vizual stillarni avtomatik qo'llaydi |
+
+## Mavzuni (theme) qo'llash
+
+1. Power BI Desktop'da **View → Themes → Browse for themes**.
+2. `AdventureWorks_Theme.json` faylini tanlang.
+3. Tamom — barcha vizual ranglari, oq kartochka foni, yumaloq burchaklar, soya va Segoe UI shriftlari avtomatik qo'llanadi.
 
 ## Tez boshlash
 
