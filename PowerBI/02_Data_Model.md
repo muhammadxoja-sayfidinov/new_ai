@@ -1,6 +1,8 @@
 # 02 — Data Model (Star Schema)
 
-Bu model **yulduz sxemasi (star schema)** asosida qurilgan: markazda fakt jadvallar (Sales, Returns), atrofida o'lcham (dimension/lookup) jadvallar.
+Bu model **yulduz sxemasi (star schema)** asosida qurilgan: markazda fakt jadvallar (AdventureWorks Sales Data, AdventureWorks Returns Data), atrofida o'lcham (dimension/lookup) jadvallar.
+
+> **MUHIM:** Jadval nomlari CSV import qilinganda kelgan asl nomlarga **to'liq** mos saqlangan (`AdventureWorks ...`). DAX'da nomida bo'sh joy bo'lgani uchun bitta qo'shtirnoq ishlatiladi: `'AdventureWorks Sales Data'[OrderQuantity]`. Shu tariqa copy-paste to'g'ridan-to'g'ri ishlaydi.
 
 ---
 
@@ -9,20 +11,22 @@ Bu model **yulduz sxemasi (star schema)** asosida qurilgan: markazda fakt jadval
 ### Fakt jadvallar (Fact tables)
 | Jadval | Manba | Tavsif |
 |---|---|---|
-| **Sales** | Sales Data 2020 + 2021 + 2022 | 3 ta CSV **Append** orqali bitta jadvalga birlashtiriladi (~56,000 qator) |
-| **Returns** | Returns Data | Qaytarishlar (~1,809 qator) |
+| **AdventureWorks Sales Data** | Sales Data 2020 + 2021 + 2022 | 3 ta CSV **Append** orqali bitta jadvalga birlashtiriladi (~56,000 qator) |
+| **AdventureWorks Returns Data** | AdventureWorks Returns Data | Qaytarishlar (~1,809 qator) |
 
 ### O'lcham jadvallar (Dimension / Lookup tables)
 | Jadval | Kalit (Key) | Tavsif |
 |---|---|---|
-| **Calendar** | Date | Sana o'lchami (date dimension) |
-| **Customers** | CustomerKey | Mijoz ma'lumotlari |
-| **Products** | ProductKey | Mahsulotlar (narx, tannarx) |
-| **Product Subcategories** | ProductSubcategoryKey | Subkategoriya |
-| **Product Categories** | ProductCategoryKey | Kategoriya |
-| **Territories** | SalesTerritoryKey | Hudud/davlat/qit'a |
+| **AdventureWorks Calendar Lookup** | Date | Sana o'lchami (date dimension) |
+| **AdventureWorks Customer Lookup** | CustomerKey | Mijoz ma'lumotlari |
+| **AdventureWorks Product Lookup** | ProductKey | Mahsulotlar (narx, tannarx) |
+| **AdventureWorks Product Subcategories Lookup** | ProductSubcategoryKey | Subkategoriya |
+| **AdventureWorks Product Categories Lookup** | ProductCategoryKey | Kategoriya |
+| **AdventureWorks Territory Lookup** | SalesTerritoryKey | Hudud/davlat/qit'a |
 
 > `Product Category Sales (Unpivot Demo).csv` modelga **kiritilmaydi** — u faqat Power Query Unpivot mashqi uchun.
+
+> **Eslatma (Sales Data nomi):** 3 ta sotuv faylini Append qilganda natija jadvalini **`AdventureWorks Sales Data`** deb nomlang (quyidagi barcha DAX shu nomga tayanadi). Agar boshqa nom qo'ysangiz, DAX'dagi `'AdventureWorks Sales Data'` ni o'sha nomga almashtiring.
 
 ---
 
@@ -31,68 +35,70 @@ Bu model **yulduz sxemasi (star schema)** asosida qurilgan: markazda fakt jadval
 Barchasi **One-to-Many (1:*)**, yo'nalishi **Single** (lookup → fact), filtr o'lchamdan faktga oqadi.
 
 ```
-                    ┌─────────────────────┐
-                    │ Product Categories  │
-                    │ (ProductCategoryKey)│
-                    └──────────┬──────────┘
-                               │ 1
-                               │ *
-                    ┌──────────┴───────────┐
-                    │ Product Subcategories│
-                    │(ProductSubcategoryKey)│
-                    └──────────┬───────────┘
-                               │ 1
-                               │ *
-   ┌───────────┐      ┌────────┴────────┐      ┌──────────────┐
-   │ Calendar  │1   * │    PRODUCTS     │ 1  * │   Returns    │
-   │  (Date)   ├──────┤  (ProductKey)   ├──────┤              │
-   └─────┬─────┘      └────────┬────────┘      └──────┬───────┘
-         │1                    │1                     │*
-         │                     │*                     │
-         │*            ┌───────┴────────┐             │
-         └─────────────┤     SALES      │             │
-                       │                │             │
-         ┌─────────────┤                │             │
-         │*            └───────┬────────┘             │
-   ┌─────┴──────┐              │*                ┌─────┴──────┐
-   │ Customers  │1             │                 │Territories │1
-   │(CustomerKey)├─────────────┘                 │(...Key)    │
-   └────────────┘         (Territories 1:* Sales)└─────┬──────┘
-                                                       │ 1:* Returns
+              ┌───────────────────────────────────────┐
+              │  AdventureWorks Product Categories     │
+              │       Lookup (ProductCategoryKey)      │
+              └────────────────────┬───────────────────┘
+                                   │ 1
+                                   │ *
+              ┌────────────────────┴───────────────────┐
+              │ AdventureWorks Product Subcategories    │
+              │     Lookup (ProductSubcategoryKey)      │
+              └────────────────────┬───────────────────┘
+                                   │ 1
+                                   │ *
+ ┌──────────────────┐    ┌─────────┴─────────┐    ┌──────────────────┐
+ │ AdventureWorks   │1  *│  AdventureWorks   │1  *│  AdventureWorks  │
+ │ Calendar Lookup  ├────┤  Product Lookup   ├────┤  Returns Data    │
+ │     (Date)       │    │   (ProductKey)    │    │                  │
+ └────────┬─────────┘    └─────────┬─────────┘    └────────┬─────────┘
+          │1                       │1                       │*
+          │                        │*                       │
+          │*             ┌─────────┴─────────┐              │
+          └──────────────┤  AdventureWorks   │              │
+                         │    Sales Data     │              │
+ ┌──────────────────┐    │                   │    ┌──────────────────┐
+ │ AdventureWorks   │1  *│                   │    │  AdventureWorks  │1
+ │ Customer Lookup  ├────┴─────────┬─────────┘    │ Territory Lookup │
+ │  (CustomerKey)   │              │*             │ (SalesTerr.Key)  │
+ └──────────────────┘              │              └────────┬─────────┘
+                                   │   (Territory 1:* Sales Data)
+                                   └───────────────────────┤
+                                       (Territory 1:* Returns Data)
 ```
 
 ### Bog'lanishlar ro'yxati
 
 | # | Dan (1 tomon) | Ga (* tomon) | Maydon | Faollik |
 |---|---|---|---|---|
-| 1 | Calendar[Date] | Sales[OrderDate] | Date / OrderDate | **Active** |
-| 2 | Calendar[Date] | Returns[ReturnDate] | Date / ReturnDate | Active |
-| 3 | Customers[CustomerKey] | Sales[CustomerKey] | CustomerKey | Active |
-| 4 | Products[ProductKey] | Sales[ProductKey] | ProductKey | Active |
-| 5 | Products[ProductKey] | Returns[ProductKey] | ProductKey | Active |
-| 6 | Product Subcategories[ProductSubcategoryKey] | Products[ProductSubcategoryKey] | — | Active |
-| 7 | Product Categories[ProductCategoryKey] | Product Subcategories[ProductCategoryKey] | — | Active |
-| 8 | Territories[SalesTerritoryKey] | Sales[TerritoryKey] | — | Active |
-| 9 | Territories[SalesTerritoryKey] | Returns[TerritoryKey] | — | Active |
+| 1 | AdventureWorks Calendar Lookup[Date] | AdventureWorks Sales Data[OrderDate] | Date / OrderDate | **Active** |
+| 2 | AdventureWorks Calendar Lookup[Date] | AdventureWorks Returns Data[ReturnDate] | Date / ReturnDate | Active |
+| 3 | AdventureWorks Customer Lookup[CustomerKey] | AdventureWorks Sales Data[CustomerKey] | CustomerKey | Active |
+| 4 | AdventureWorks Product Lookup[ProductKey] | AdventureWorks Sales Data[ProductKey] | ProductKey | Active |
+| 5 | AdventureWorks Product Lookup[ProductKey] | AdventureWorks Returns Data[ProductKey] | ProductKey | Active |
+| 6 | AdventureWorks Product Subcategories Lookup[ProductSubcategoryKey] | AdventureWorks Product Lookup[ProductSubcategoryKey] | — | Active |
+| 7 | AdventureWorks Product Categories Lookup[ProductCategoryKey] | AdventureWorks Product Subcategories Lookup[ProductCategoryKey] | — | Active |
+| 8 | AdventureWorks Territory Lookup[SalesTerritoryKey] | AdventureWorks Sales Data[TerritoryKey] | — | Active |
+| 9 | AdventureWorks Territory Lookup[SalesTerritoryKey] | AdventureWorks Returns Data[TerritoryKey] | — | Active |
 
-> Eslatma: Sales[StockDate] uchun Calendar bilan ikkinchi bog'lanish kerak bo'lsa, u **inactive** bo'ladi va `USERELATIONSHIP` orqali ishlatiladi. Standart dashboard uchun shart emas.
+> Eslatma: AdventureWorks Sales Data[StockDate] uchun Calendar bilan ikkinchi bog'lanish kerak bo'lsa, u **inactive** bo'ladi va `USERELATIONSHIP` orqali ishlatiladi. Standart dashboard uchun shart emas.
 
 ---
 
 ## 3. Power Query tayyorgarligi (ETL)
 
-### Sales jadvali
+### AdventureWorks Sales Data jadvali
 1. 3 ta Sales CSV ni import qiling.
-2. **Append Queries** → bitta `Sales` jadvali.
+2. **Append Queries** → bitta jadvalga birlashtiring, nomini **`AdventureWorks Sales Data`** qo'ying.
 3. `OrderDate`, `StockDate` → **Date** turiga o'tkazing.
 4. Kalitlar (ProductKey, CustomerKey, TerritoryKey) → **Whole Number**.
 5. `OrderQuantity` → **Whole Number**.
 
-### Calendar jadvali
-- Tayyor CSV import qilinadi (`Date` ustuni).
+### AdventureWorks Calendar Lookup jadvali
+- Tayyor CSV import qilinadi (`Date` ustuni) — nomi `AdventureWorks Calendar Lookup`.
 - **Yoki** to'liqroq nazorat uchun DAX bilan yarating (4-bo'limga qarang) — tavsiya etiladi.
 
-### Products
+### AdventureWorks Product Lookup
 - `ProductCost`, `ProductPrice` → **Decimal Number**.
 
 ### Boshqalar
@@ -100,14 +106,14 @@ Barchasi **One-to-Many (1:*)**, yo'nalishi **Single** (lookup → fact), filtr o
 
 ---
 
-## 4. Calendar jadvali (DAX bilan — tavsiya etiladi)
+## 4. AdventureWorks Calendar Lookup jadvali (DAX bilan — tavsiya etiladi)
 
 CSV o'rniga to'liq date dimension yarating. **Modeling → New Table**:
 
 ```dax
-Calendar =
-VAR _min = MIN ( Sales[OrderDate] )
-VAR _max = MAX ( Sales[OrderDate] )
+AdventureWorks Calendar Lookup =
+VAR _min = MIN ( 'AdventureWorks Sales Data'[OrderDate] )
+VAR _max = MAX ( 'AdventureWorks Sales Data'[OrderDate] )
 RETURN
 ADDCOLUMNS (
     CALENDAR ( DATE ( YEAR(_min), 1, 1 ), DATE ( YEAR(_max), 12, 31 ) ),
@@ -123,6 +129,8 @@ ADDCOLUMNS (
 )
 ```
 
+> Agar tayyor CSV (`AdventureWorks Calendar Lookup`) ishlatsangiz, bu DAX jadvalini yaratmang — aks holda nom to'qnashadi. Bittasini tanlang.
+
 So'ng **Modeling → Mark as Date Table** → `Date` ustunini tanlang.
 
 > `Month` ustunini to'g'ri tartiblash uchun: `Month` ustunini tanlab → **Sort by Column** → `Month Number`.
@@ -131,39 +139,39 @@ So'ng **Modeling → Mark as Date Table** → `Date` ustunini tanlang.
 
 ## 5. Calculated Columns (hisoblangan ustunlar)
 
-### Products jadvalida
+### AdventureWorks Product Lookup jadvalida
 ```dax
 -- Narx oralig'i bo'yicha guruhlash
 Price Point =
 SWITCH ( TRUE (),
-    Products[ProductPrice] > 500, "High",
-    Products[ProductPrice] > 100, "Mid-Range",
+    'AdventureWorks Product Lookup'[ProductPrice] > 500, "High",
+    'AdventureWorks Product Lookup'[ProductPrice] > 100, "Mid-Range",
     "Low"
 )
 ```
 
-### Customers jadvalida
+### AdventureWorks Customer Lookup jadvalida
 ```dax
 -- To'liq ism
-Full Name = Customers[FirstName] & " " & Customers[LastName]
+Full Name = 'AdventureWorks Customer Lookup'[FirstName] & " " & 'AdventureWorks Customer Lookup'[LastName]
 ```
 ```dax
 -- Yosh
-Customer Age = DATEDIFF ( Customers[BirthDate], TODAY (), YEAR )
+Customer Age = DATEDIFF ( 'AdventureWorks Customer Lookup'[BirthDate], TODAY (), YEAR )
 ```
 ```dax
 -- Daromad darajasi
 Income Level =
 SWITCH ( TRUE (),
-    Customers[AnnualIncome] >= 150000, "Very High",
-    Customers[AnnualIncome] >= 100000, "High",
-    Customers[AnnualIncome] >= 50000,  "Average",
+    'AdventureWorks Customer Lookup'[AnnualIncome] >= 150000, "Very High",
+    'AdventureWorks Customer Lookup'[AnnualIncome] >= 100000, "High",
+    'AdventureWorks Customer Lookup'[AnnualIncome] >= 50000,  "Average",
     "Low"
 )
 ```
 ```dax
 -- Mijoz nechta bola bilan (ota-ona/oilaviy holat)
-Parent Status = IF ( Customers[TotalChildren] > 0, "Parent", "Not Parent" )
+Parent Status = IF ( 'AdventureWorks Customer Lookup'[TotalChildren] > 0, "Parent", "Not Parent" )
 ```
 
 > Measure'lar (SUM, time-intelligence va h.k.) keyingi faylda — `03_DAX_Measures.md`.

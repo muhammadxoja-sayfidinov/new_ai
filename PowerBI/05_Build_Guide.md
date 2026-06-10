@@ -25,22 +25,23 @@
 
 1. **Sales jadvallarini birlashtirish:**
    - `Home → Append Queries → Append Queries as New`.
-   - 3  ta sales jadvalini tanlang → natijani **Sales** deb nomlang.
+   - 3 ta sales jadvalini tanlang → natijani **`AdventureWorks Sales Data`** deb nomlang.
    - Eski 3 ta query'ni **Enable load** dan o'chiring (yuklamaslik uchun).
 2. **Ma'lumot turlarini to'g'rilang:**
    - `OrderDate`, `StockDate`, `ReturnDate` → Date.
    - Barcha `...Key` ustunlar → Whole Number.
    - `ProductCost`, `ProductPrice` → Decimal Number.
    - `OrderQuantity`, `ReturnQuantity` → Whole Number.
-3. Jadval nomlarini soddalashtiring: `Customers`, `Products`, `Product Subcategories`, `Product Categories`, `Territories`, `Returns`.
+3. **MUHIM — jadval nomlarini O'ZGARTIRMANG.** CSV import qilinganda kelgan asl nomlarni saqlang (DAX shu nomlarga tayanadi):
+   `AdventureWorks Customer Lookup`, `AdventureWorks Product Lookup`, `AdventureWorks Product Subcategories Lookup`, `AdventureWorks Product Categories Lookup`, `AdventureWorks Territory Lookup`, `AdventureWorks Returns Data`.
 4. **Close & Apply**.
 
 ---
 
 ## QADAM 3 — Calendar jadvali (DAX)
 
-1. **Modeling → New Table** → `02_Data_Model.md` dagi `Calendar` kodini joylashtiring.
-2. `Calendar` tanlangan holda **Table tools → Mark as Date Table → Date**.
+1. **Modeling → New Table** → `02_Data_Model.md` dagi `AdventureWorks Calendar Lookup` kodini joylashtiring.
+2. Jadval tanlangan holda **Table tools → Mark as Date Table → Date**.
 3. `Month` ustunini **Sort by Column → Month Number** qiling (`Quarter`, `Weekday` uchun ham mos raqamli ustun bilan).
 
 ---
@@ -50,19 +51,19 @@
 1. Chap paneldan **Model view** ga o'ting.
 2. `02_Data_Model.md` dagi 9 ta bog'lanishni tekshiring/yarating (drag & drop).
 3. Har biri **1:* , Single direction** ekanligiga ishonch hosil qiling:
-   - Calendar[Date] → Sales[OrderDate] **(active)**
-   - Calendar[Date] → Returns[ReturnDate]
-   - Customers → Sales, Products → Sales, Products → Returns
-   - Subcategories → Products, Categories → Subcategories
-   - Territories → Sales, Territories → Returns
+   - AdventureWorks Calendar Lookup[Date] → AdventureWorks Sales Data[OrderDate] **(active)**
+   - AdventureWorks Calendar Lookup[Date] → AdventureWorks Returns Data[ReturnDate]
+   - Customer Lookup → Sales Data, Product Lookup → Sales Data, Product Lookup → Returns Data
+   - Subcategories Lookup → Product Lookup, Categories Lookup → Subcategories Lookup
+   - Territory Lookup → Sales Data, Territory Lookup → Returns Data
 
 ---
 
 ## QADAM 5 — Calculated Columns
 
 `02_Data_Model.md` dagi ustunlarni qo'shing:
-- **Products:** `Price Point`
-- **Customers:** `Full Name`, `Customer Age`, `Income Level`, `Parent Status`
+- **AdventureWorks Product Lookup:** `Price Point`
+- **AdventureWorks Customer Lookup:** `Full Name`, `Customer Age`, `Income Level`, `Parent Status`
 
 (Har biri: tegishli jadval → **New Column** → kodni joylashtiring.)
 

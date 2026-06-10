@@ -5,18 +5,20 @@ Barcha measure'larni **`_Measures`** nomli alohida jadvalda saqlash tavsiya etil
 
 Har bir measure'ni **Modeling → New Measure** orqali qo'shing va format/birlikni sozlang.
 
+> **MUHIM:** Jadval nomlari CSV import qilinganda kelgan asl nomlarga to'liq mos (`AdventureWorks ...`). Nomida bo'sh joy bor jadval bitta qo'shtirnoq bilan yoziladi: `'AdventureWorks Sales Data'[OrderQuantity]`. Quyidagilarni to'g'ridan-to'g'ri copy-paste qilsangiz ishlaydi.
+
 ---
 
 ## 1-guruh: Asosiy ko'rsatkichlar (Core Measures)
 
 ```dax
 Total Revenue =
-SUMX ( Sales, Sales[OrderQuantity] * RELATED ( Products[ProductPrice] ) )
+SUMX ( 'AdventureWorks Sales Data', 'AdventureWorks Sales Data'[OrderQuantity] * RELATED ( 'AdventureWorks Product Lookup'[ProductPrice] ) )
 ```
 
 ```dax
 Total Cost =
-SUMX ( Sales, Sales[OrderQuantity] * RELATED ( Products[ProductCost] ) )
+SUMX ( 'AdventureWorks Sales Data', 'AdventureWorks Sales Data'[OrderQuantity] * RELATED ( 'AdventureWorks Product Lookup'[ProductCost] ) )
 ```
 
 ```dax
@@ -29,15 +31,15 @@ Profit Margin = DIVIDE ( [Total Profit], [Total Revenue] )
 *Format: Percentage.*
 
 ```dax
-Quantity Sold = SUM ( Sales[OrderQuantity] )
+Quantity Sold = SUM ( 'AdventureWorks Sales Data'[OrderQuantity] )
 ```
 
 ```dax
-Total Orders = DISTINCTCOUNT ( Sales[OrderNumber] )
+Total Orders = DISTINCTCOUNT ( 'AdventureWorks Sales Data'[OrderNumber] )
 ```
 
 ```dax
-Total Customers = DISTINCTCOUNT ( Sales[CustomerKey] )
+Total Customers = DISTINCTCOUNT ( 'AdventureWorks Sales Data'[CustomerKey] )
 ```
 
 ```dax
@@ -54,7 +56,7 @@ Revenue per Customer = DIVIDE ( [Total Revenue], [Total Customers] )
 ## 2-guruh: Qaytarishlar (Returns)
 
 ```dax
-Total Returns = SUM ( Returns[ReturnQuantity] )
+Total Returns = SUM ( 'AdventureWorks Returns Data'[ReturnQuantity] )
 ```
 
 ```dax
@@ -65,21 +67,21 @@ Return Rate = DIVIDE ( [Total Returns], [Quantity Sold] )
 ```dax
 -- Qaytarilgan daromad (yo'qotilgan revenue)
 Returned Revenue =
-SUMX ( Returns, Returns[ReturnQuantity] * RELATED ( Products[ProductPrice] ) )
+SUMX ( 'AdventureWorks Returns Data', 'AdventureWorks Returns Data'[ReturnQuantity] * RELATED ( 'AdventureWorks Product Lookup'[ProductPrice] ) )
 ```
 
 ---
 
 ## 3-guruh: Time Intelligence (vaqt bo'yicha tahlil)
 
-> `Calendar` jadvali "Mark as Date Table" qilingan bo'lishi shart.
+> `AdventureWorks Calendar Lookup` jadvali "Mark as Date Table" qilingan bo'lishi shart.
 
 ```dax
-Revenue YTD = TOTALYTD ( [Total Revenue], 'Calendar'[Date] )
+Revenue YTD = TOTALYTD ( [Total Revenue], 'AdventureWorks Calendar Lookup'[Date] )
 ```
 
 ```dax
-Revenue PY = CALCULATE ( [Total Revenue], SAMEPERIODLASTYEAR ( 'Calendar'[Date] ) )
+Revenue PY = CALCULATE ( [Total Revenue], SAMEPERIODLASTYEAR ( 'AdventureWorks Calendar Lookup'[Date] ) )
 ```
 
 ```dax
@@ -96,7 +98,7 @@ Revenue YoY % = DIVIDE ( [Revenue YoY], [Revenue PY] )
 Revenue 10-Day Rolling =
 CALCULATE (
     [Total Revenue],
-    DATESINPERIOD ( 'Calendar'[Date], MAX ( 'Calendar'[Date] ), -10, DAY )
+    DATESINPERIOD ( 'AdventureWorks Calendar Lookup'[Date], MAX ( 'AdventureWorks Calendar Lookup'[Date] ), -10, DAY )
 )
 ```
 
@@ -106,8 +108,8 @@ Revenue Running Total =
 CALCULATE (
     [Total Revenue],
     FILTER (
-        ALLSELECTED ( 'Calendar'[Date] ),
-        'Calendar'[Date] <= MAX ( 'Calendar'[Date] )
+        ALLSELECTED ( 'AdventureWorks Calendar Lookup'[Date] ),
+        'AdventureWorks Calendar Lookup'[Date] <= MAX ( 'AdventureWorks Calendar Lookup'[Date] )
     )
 )
 ```
@@ -118,22 +120,22 @@ CALCULATE (
 
 ```dax
 Previous Month Revenue =
-CALCULATE ( [Total Revenue], PREVIOUSMONTH ( 'Calendar'[Date] ) )
+CALCULATE ( [Total Revenue], PREVIOUSMONTH ( 'AdventureWorks Calendar Lookup'[Date] ) )
 ```
 
 ```dax
 Previous Month Orders =
-CALCULATE ( [Total Orders], PREVIOUSMONTH ( 'Calendar'[Date] ) )
+CALCULATE ( [Total Orders], PREVIOUSMONTH ( 'AdventureWorks Calendar Lookup'[Date] ) )
 ```
 
 ```dax
 Previous Month Profit =
-CALCULATE ( [Total Profit], PREVIOUSMONTH ( 'Calendar'[Date] ) )
+CALCULATE ( [Total Profit], PREVIOUSMONTH ( 'AdventureWorks Calendar Lookup'[Date] ) )
 ```
 
 ```dax
 Previous Month Returns =
-CALCULATE ( [Total Returns], PREVIOUSMONTH ( 'Calendar'[Date] ) )
+CALCULATE ( [Total Returns], PREVIOUSMONTH ( 'AdventureWorks Calendar Lookup'[Date] ) )
 ```
 
 ```dax
@@ -157,8 +159,8 @@ Profit Target = [Previous Month Profit] * 1.1
 -- Mahsulotlarni daromad bo'yicha tartiblash
 Product Rank =
 IF (
-    HASONEVALUE ( Products[ProductName] ),
-    RANKX ( ALL ( Products[ProductName] ), [Total Revenue],, DESC )
+    HASONEVALUE ( 'AdventureWorks Product Lookup'[ProductName] ),
+    RANKX ( ALL ( 'AdventureWorks Product Lookup'[ProductName] ), [Total Revenue],, DESC )
 )
 ```
 
@@ -166,8 +168,8 @@ IF (
 -- Mijozlarni daromad bo'yicha tartiblash
 Customer Rank =
 IF (
-    HASONEVALUE ( Customers[Full Name] ),
-    RANKX ( ALL ( Customers[Full Name] ), [Total Revenue],, DESC )
+    HASONEVALUE ( 'AdventureWorks Customer Lookup'[Full Name] ),
+    RANKX ( ALL ( 'AdventureWorks Customer Lookup'[Full Name] ), [Total Revenue],, DESC )
 )
 ```
 

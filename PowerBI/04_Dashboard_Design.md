@@ -42,11 +42,11 @@
 
 **Vizuallar:**
 1. **KPI Cards (4 ta)** — `Total Revenue`, `Total Profit`, `Total Orders`, `Return Rate`. Har birida "vs Previous Month" trend (KPI visual yoki Card + kichik matn).
-2. **Line chart** — X: `Calendar[Month Year]`, Y: `Total Revenue`, ikkinchi qator: `Revenue Target`.
-3. **Donut/Bar** — `Total Revenue` by `Product Categories[CategoryName]`.
-4. **Map yoki Bar** — `Total Revenue` by `Territories[Country]`.
-5. **Bar chart** — Top 10 `Products[ProductName]` by `Total Revenue` (Top N filter).
-6. **Slicer** — `Calendar[Year]` (yuqori o'ng burchak).
+2. **Line chart** — X: `'AdventureWorks Calendar Lookup'[Month Year]`, Y: `Total Revenue`, ikkinchi qator: `Revenue Target`.
+3. **Donut/Bar** — `Total Revenue` by `'AdventureWorks Product Categories Lookup'[CategoryName]`.
+4. **Map yoki Bar** — `Total Revenue` by `'AdventureWorks Territory Lookup'[Country]`.
+5. **Bar chart** — Top 10 `'AdventureWorks Product Lookup'[ProductName]` by `Total Revenue` (Top N filter).
+6. **Slicer** — `'AdventureWorks Calendar Lookup'[Year]` (yuqori o'ng burchak).
 
 ---
 
@@ -122,7 +122,7 @@
 ## Interaktivlik (UX)
 
 - **Cross-filtering:** barcha vizuallar bir-birini filtrlaydi (default yoqilgan).
-- **Drill-through:** Product sahifasiga drill-through o'rnating (Sales[ProductKey] yoki CategoryName bo'yicha).
+- **Drill-through:** Product sahifasiga drill-through o'rnating (`'AdventureWorks Sales Data'[ProductKey]` yoki CategoryName bo'yicha).
 - **Tooltips:** maxsus tooltip sahifasi — kursor ostida mini revenue trend ko'rsatish.
 - **Bookmarks:** "Reset filters" tugmasi uchun bookmark.
 - **Buttons:** sahifalar orasida navigatsiya (Page Navigator).
